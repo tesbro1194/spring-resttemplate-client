@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -73,7 +74,8 @@ public class RestTemplateService {
         log.info("uri = " + uri);
 
         User user = new User("Robbie", "1234");
-        // Post 방식으로 서버에 요청 진행. 해당 uri(첫 번째 인자)에서 받을 데이터를 받아줄 타입(세 번쨰 인자). 클라이언트의 입력값을 담을 객체(두 번째 인자, RestTemplate에 의해 Json 형태로 변환)
+        // Post 방식으로 서버에 요청 진행. 해당 uri(첫 번째 인자)에서 받을 데이터를 받아줄 타입(세 번쨰 인자).
+        // server의 server로 보낼 Body (두 번째 인자, RestTemplate에 의해 Json 형태로 변환)
         ResponseEntity<ItemDto> responseEntity = restTemplate.postForEntity(uri, user, ItemDto.class);
 
         log.info("statusCode = " + responseEntity.getStatusCode());
@@ -82,10 +84,28 @@ public class RestTemplateService {
     }
 
     public List<ItemDto> exchangeCall(String token) {
-        return null;
-    }
-/*
+        // 요청 URL 만들기
+        URI uri = UriComponentsBuilder
+                .fromUriString("http://localhost:7070")
+                .path("/api/server/exchange-call")
+                .encode()
+                .build()
+                .toUri();
+        log.info("uri = " + uri);
+        // Body 에 들어갈 데이터
+        User user = new User("Robbie", "1234");
 
+        RequestEntity<User> requestEntity = RequestEntity
+                .post(uri)
+                .header("X-Authorization", token)
+                .body(user);
+        // server의 server로 보낼 RequestEntity (1번 인자)와 server의 server로부터 받을 데이터 타입(2번 인자)
+        ResponseEntity<String> responseEntity = restTemplate.exchange(requestEntity, String.class);
+
+        return fromJSONtoItems(responseEntity.getBody());
+    }
+
+/*
     {
         "items":[
         {"title":"Mac","price":3888000},
