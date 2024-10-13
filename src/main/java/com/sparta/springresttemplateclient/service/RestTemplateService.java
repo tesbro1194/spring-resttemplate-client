@@ -1,6 +1,7 @@
 package com.sparta.springresttemplateclient.service;
 
 import com.sparta.springresttemplateclient.dto.ItemDto;
+import com.sparta.springresttemplateclient.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,7 +30,7 @@ public class RestTemplateService {
         URI uri = UriComponentsBuilder
                 .fromUriString("http://localhost:7070")
                 .path("/api/server/get-call-obj")
-                .queryParam("query", query)
+                .queryParam("query", query)  // @RequestParam
                 .encode()
                 .build()
                 .toUri();
@@ -60,9 +61,24 @@ public class RestTemplateService {
 
         return fromJSONtoItems(responseEntity.getBody());
     }
-
     public ItemDto postCall(String query) {
-        return null;
+        // 요청 URL 만들기
+        URI uri = UriComponentsBuilder
+                .fromUriString("http://localhost:7070")
+                .path("/api/server/post-call/{query}")  // @PathVariable 방식
+                .encode()
+                .build()
+                .expand(query)  // 위 {} 에 들어갈 값을 넣어준다
+                .toUri();
+        log.info("uri = " + uri);
+
+        User user = new User("Robbie", "1234");
+        // Post 방식으로 서버에 요청 진행. 해당 uri(첫 번째 인자)에서 받을 데이터를 받아줄 타입(세 번쨰 인자). 클라이언트의 입력값을 담을 객체(두 번째 인자, RestTemplate에 의해 Json 형태로 변환)
+        ResponseEntity<ItemDto> responseEntity = restTemplate.postForEntity(uri, user, ItemDto.class);
+
+        log.info("statusCode = " + responseEntity.getStatusCode());
+
+        return responseEntity.getBody();
     }
 
     public List<ItemDto> exchangeCall(String token) {

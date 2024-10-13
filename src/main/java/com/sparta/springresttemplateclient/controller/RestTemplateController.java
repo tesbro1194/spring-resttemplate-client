@@ -2,10 +2,7 @@ package com.sparta.springresttemplateclient.controller;
 
 import com.sparta.springresttemplateclient.dto.ItemDto;
 import com.sparta.springresttemplateclient.service.RestTemplateService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,7 +17,7 @@ public class RestTemplateController {
     }
 
     @GetMapping("/get-call-obj")
-    public ItemDto getCallObject(String query) {
+    public ItemDto getCallObject(@RequestParam String query) { // @RequestParam 생략 가능
         return restTemplateService.getCallObject(query);
     }
 
